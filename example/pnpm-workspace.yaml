@@ -1,0 +1,2 @@
+overrides:
+  widget-ccat-react-ts: link:../../../.local/share/pnpm/global/5/node_modules/widget-ccat-react-ts

@@ -1,16 +1,40 @@
 {
   "name": "widget-ccat-react-ts",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "CheshireCat React Widget",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "vitest",
-    "build": "tsup"
+    "dev": "tsup --watch",
+    "dev:css": "tailwindcss -i ./src/index.css -o ./dist/styles.css --watch",
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "build:css": "tailwindcss -i ./src/index.css -o ./dist/styles.css --minify",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run build:css"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "widget",
+    "cheshire-cat",
+    "typescript"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -21,9 +45,16 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "install": "^0.13.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
-  }
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
 }

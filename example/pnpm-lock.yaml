@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  widget-ccat-react-ts: link:../../../.local/share/pnpm/global/5/node_modules/widget-ccat-react-ts
+
 importers:
 
   .:
@@ -17,6 +20,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
+      widget-ccat-react-ts:
+        specifier: link:../../../.local/share/pnpm/global/5/node_modules/widget-ccat-react-ts
+        version: link:../../../.local/share/pnpm/global/5/node_modules/widget-ccat-react-ts
     devDependencies:
       '@eslint/js':
         specifier: ^9.29.0

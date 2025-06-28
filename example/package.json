@@ -12,7 +12,8 @@
   "dependencies": {
     "install": "^0.13.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "widget-ccat-react-ts": "link:../../../.local/share/pnpm/global/5/node_modules/widget-ccat-react-ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
