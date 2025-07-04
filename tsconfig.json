@@ -9,7 +9,16 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@stores/*": ["src/stores/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@models/*": ["src/models/*"],
+      "@utils/*": ["src/utils/*"]
+    }
   },
   "include": ["src"]
 }
