@@ -1,8 +1,9 @@
-import { useState, useCallback, createContext, ReactNode } from "react";
-import { result, uniqueId } from "lodash";
+import { useState, useCallback, createContext } from "react";
+import { uniqueId } from "lodash";
 import type { JSONResponse } from "@models/JSONSchema";
 import type { Notification } from "@models/Notification";
 import type { NotificationsState } from "@stores/types";
+import { ContextProviderProps } from "@/types";
 
 export interface NotificationsContextType {
   currentState: NotificationsState;
@@ -18,13 +19,8 @@ export interface NotificationsContextType {
 export const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
-interface NotificationsProviderProps {
-  children: ReactNode;
-}
 
-export const NotificationsProvider = ({
-  children,
-}: NotificationsProviderProps) => {
+export const NotificationsProvider = ({ children }: ContextProviderProps) => {
   const [currentState, setCurrentState] = useState<NotificationsState>({
     history: [],
   });

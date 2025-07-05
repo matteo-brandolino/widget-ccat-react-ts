@@ -44,7 +44,7 @@ interface MessagesContextType {
   ) => Promise<void>;
 }
 
-const MessagesContext = createContext<MessagesContextType | undefined>(
+export const MessagesContext = createContext<MessagesContextType | undefined>(
   undefined
 );
 
