@@ -36,11 +36,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
     "ccat-api": "^0.12.1",
     "colord": "^2.9.3",
-    "loadsh": "^0.0.4",
+    "highlight.js": "^11.11.1",
+    "lodash": "^4.17.21",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-speech-recognition": "^4.0.1",
+    "react-transition-group": "^4.4.5",
+    "remarkable": "^2.0.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
@@ -49,7 +55,11 @@
     "@types/lodash": "^4.17.20",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/react-speech-recognition": "^3.9.6",
+    "@types/react-transition-group": "^4.4.12",
+    "@types/remarkable": "^2.0.8",
     "autoprefixer": "^10.4.16",
+    "daisyui": "^5.0.43",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
     "tsup": "^8.5.0",

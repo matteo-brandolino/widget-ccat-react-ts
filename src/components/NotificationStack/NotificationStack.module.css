@@ -1,0 +1,31 @@
+.notifications-move,
+.notifications-enter-active,
+.notifications-leave-active {
+  transition: all 0.5s ease;
+}
+
+.notifications-enter-from,
+.notifications-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.notifications-enter {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.notifications-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.notifications-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.notifications-exit-active {
+  opacity: 0;
+  transform: translateX(30px);
+}
