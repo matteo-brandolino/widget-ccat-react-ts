@@ -1,5 +1,5 @@
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import "./NotificationsStack.module.css";
+import "./NotificationStack.module.css";
 import { createContextHook } from "@/hooks/createContextHook";
 import { NotificationsContext } from "@/stores/notifications";
 

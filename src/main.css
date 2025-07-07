@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
 @import url("highlight.js/styles/github.css");
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   @import url("highlight.js/styles/github-dark.css");
-}
+} */
 
 @tailwind base;
 
@@ -36,10 +36,10 @@
     @apply ccat-border-2;
   }
   .ccat-focus {
-    @apply !ccat-bg-primary ccat-hover:ccat-bg-primary-focus ccat-focus:ccat-bg-primary-focus ccat-text-base-100;
+    @apply !ccat-bg-primary ccat-text-base-100;
   }
   .ccat-btn-ghost {
-    @apply ccat-disabled:bg-transparent;
+    @apply disabled:ccat-bg-transparent;
   }
   .ccat-btn-outline.ccat-btn-error:hover,
   .ccat-btn-outline.ccat-btn-success:hover,
@@ -67,7 +67,7 @@
   .ccat-select,
   .ccat-input,
   .ccat-textarea {
-    @apply ccat-overflow-hidden ccat-outline ccat-outline-offset-2 ccat-bg-transparent ccat-outline-2 ccat-border-0 !ccat-ring-0 !ccat-transition-all !ccat-duration-75 ccat-focus:ccat-outline-primary;
+    @apply ccat-overflow-hidden ccat-outline ccat-outline-offset-2 ccat-bg-transparent ccat-outline-2 ccat-border-0 !ccat-ring-0 !ccat-transition-all !ccat-duration-75 focus:ccat-outline-primary;
   }
   .ccat-toggle {
     @apply !ccat-bg-none !ccat-border-2;

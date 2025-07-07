@@ -21,7 +21,7 @@ export const RabbitHoleProvider = ({ children }: { children: ReactNode }) => {
   });
   const useNotifications = createContextHook(
     NotificationsContext,
-    "NotiuseNotifications"
+    "Notifications"
   );
 
   const { sendNotificationFromJSON } = useNotifications();
