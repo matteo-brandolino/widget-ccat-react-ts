@@ -12,7 +12,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": "./dist/index.css"
   },
   "files": [
     "dist"
@@ -20,10 +20,7 @@
   "scripts": {
     "test": "vitest",
     "dev": "tsup --watch",
-    "dev:css": "tailwindcss -i ./src/main.css -o ./dist/styles.css --watch",
     "build": "tsup",
-    "build:watch": "tsup --watch",
-    "build:css": "tailwindcss -i ./src/main.css -o ./dist/styles.css --minify",
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm run build:css"
   },
