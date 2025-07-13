@@ -1,1 +1,1 @@
-export { CheshireCatWidget } from "./ChatWidget";
+export { CheshireCatWidget } from "./main";
