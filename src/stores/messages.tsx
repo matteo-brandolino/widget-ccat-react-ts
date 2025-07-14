@@ -1,11 +1,11 @@
 import { createContext, useState, useCallback, useEffect } from "react";
 import { now, uniqueId } from "lodash";
-import { apiClient } from "@/config";
 import type { MessagesState } from "@stores/types";
 import type { BotMessage, UserMessage } from "@models/Message";
 import { ContextProviderProps } from "@/types";
 import { createContextHook } from "@/hooks/createContextHook";
 import { NotificationsContext } from "./notifications";
+import { CatClientContext } from "./apiClientProvider";
 
 const DEFAULT_MESSAGES = [
   "What's up?",
@@ -59,11 +59,13 @@ export const MessagesProvider = ({ children }: ContextProviderProps) => {
     NotificationsContext,
     "Notifications"
   );
+  const useApiClient = createContextHook(CatClientContext, "CatClient");
   const { showNotification } = useNotifications();
+  const { client: apiClient } = useApiClient();
 
   useEffect(() => {
     apiClient
-      .onConnected(() => {
+      ?.onConnected(() => {
         setCurrentState((state) => ({ ...state, ready: true }));
       })
       .onMessage(({ content, type, why }) => {
@@ -94,9 +96,9 @@ export const MessagesProvider = ({ children }: ContextProviderProps) => {
       });
 
     return () => {
-      apiClient.close();
+      apiClient?.close();
     };
-  }, [showNotification]);
+  }, [showNotification, apiClient]);
 
   const addMessage = useCallback(
     (message: Omit<BotMessage, "id"> | Omit<UserMessage, "id">) => {
@@ -111,7 +113,7 @@ export const MessagesProvider = ({ children }: ContextProviderProps) => {
         loading: msg.sender === "user",
       }));
     },
-    []
+    [apiClient]
   );
 
   const selectRandomDefaultMessages = useCallback(
@@ -134,9 +136,9 @@ export const MessagesProvider = ({ children }: ContextProviderProps) => {
     ) => {
       if (callback) {
         const msg = await callback(message);
-        apiClient.send({ text: msg }, userId);
+        apiClient?.send({ text: msg }, userId);
       } else {
-        apiClient.send({ text: message }, userId);
+        apiClient?.send({ text: message }, userId);
       }
       addMessage({
         text: message.trim(),
@@ -144,7 +146,7 @@ export const MessagesProvider = ({ children }: ContextProviderProps) => {
         sender: "user",
       });
     },
-    [addMessage]
+    [addMessage, apiClient]
   );
 
   const value: MessagesContextType = {

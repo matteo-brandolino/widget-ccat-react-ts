@@ -1,18 +1,9 @@
 import type { JSONResponse } from "@models/JSONSchema";
-import type { CatClient, CancelablePromise } from "ccat-api";
+import type { CancelablePromise } from "ccat-api";
 import { getErrorMessage } from "@utils/errors";
 
 export const Features = ["record", "web", "file", "memory", "reset"] as const;
 export type Feature = (typeof Features)[number];
-
-/**
- * API client to make requests to the endpoints and passing the API_KEY for authentication.
- */
-export let apiClient: CatClient;
-
-export const updateClient = (client: CatClient) => {
-  apiClient = client;
-};
 
 /**
  * A function that wraps the promise request into a try/catch block

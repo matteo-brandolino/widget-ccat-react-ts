@@ -1,4 +1,4 @@
-import type { FileResponse, WebResponse } from "ccat-api";
+import type { FileResponse, WebResponse } from "api";
 import type { Message } from "@models/Message";
 import type { Notification } from "@models/Notification";
 

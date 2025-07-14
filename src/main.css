@@ -32,62 +32,62 @@
 }
 
 @layer components {
-  .ccat-btn-outline {
-    @apply ccat-border-2;
+  .btn-outline {
+    @apply border-2;
   }
-  .ccat-focus {
-    @apply !ccat-bg-primary ccat-text-base-100;
+  .focus {
+    @apply !bg-primary text-base-100;
   }
-  .ccat-btn-ghost {
-    @apply disabled:ccat-bg-transparent;
+  .btn-ghost {
+    @apply disabled:bg-transparent;
   }
-  .ccat-btn-outline.ccat-btn-error:hover,
-  .ccat-btn-outline.ccat-btn-success:hover,
-  .ccat-btn-outline.ccat-btn-info:hover,
-  .ccat-btn-outline.ccat-btn-warning:hover,
-  .ccat-btn-error,
-  .ccat-btn-info,
-  .ccat-btn-success,
-  .ccat-btn-warning {
-    @apply ccat-text-base-100;
+  .btn-outline.btn-error:hover,
+  .btn-outline.btn-success:hover,
+  .btn-outline.btn-info:hover,
+  .btn-outline.btn-warning:hover,
+  .btn-error,
+  .btn-info,
+  .btn-success,
+  .btn-warning {
+    @apply text-base-100;
   }
-  .ccat-btn-error:hover:not(.ccat-btn-outline),
-  .ccat-btn-error.ccat-btn-active:not(.ccat-btn-outline),
-  .ccat-btn-info:hover:not(.ccat-btn-outline),
-  .ccat-btn-info.ccat-btn-active:not(.ccat-btn-outline),
-  .ccat-btn-success:hover:not(.ccat-btn-outline),
-  .ccat-btn-success.ccat-btn-active:not(.ccat-btn-outline),
-  .ccat-btn-warning:hover:not(.ccat-btn-outline),
-  .ccat-btn-warning.ccat-btn-active:not(.ccat-btn-outline) {
-    @apply ccat-brightness-[0.8];
+  .btn-error:hover:not(.btn-outline),
+  .btn-error.btn-active:not(.btn-outline),
+  .btn-info:hover:not(.btn-outline),
+  .btn-info.btn-active:not(.btn-outline),
+  .btn-success:hover:not(.btn-outline),
+  .btn-success.btn-active:not(.btn-outline),
+  .btn-warning:hover:not(.btn-outline),
+  .btn-warning.btn-active:not(.btn-outline) {
+    @apply brightness-[0.8];
   }
-  .ccat-checkbox {
-    @apply ccat-border-2;
+  .checkbox {
+    @apply border-2;
   }
-  .ccat-select,
-  .ccat-input,
-  .ccat-textarea {
-    @apply ccat-overflow-hidden ccat-outline ccat-outline-offset-2 ccat-bg-transparent ccat-outline-2 ccat-border-0 !ccat-ring-0 !ccat-transition-all !ccat-duration-75 focus:ccat-outline-primary;
+  .select,
+  .input,
+  .textarea {
+    @apply overflow-hidden outline outline-offset-2 bg-transparent outline-2 border-0 !ring-0 !transition-all !duration-75 focus:outline-primary;
   }
-  .ccat-toggle {
-    @apply !ccat-bg-none !ccat-border-2;
+  .toggle {
+    @apply !bg-none !border-2;
   }
-  .ccat-chat-bubble a {
-    @apply !ccat-link !ccat-link-info;
+  .chat-bubble a {
+    @apply !link !link-info;
   }
-  .ccat-chat-bubble table {
-    @apply !ccat-table !ccat-table-xs;
+  .chat-bubble table {
+    @apply !table !table-xs;
   }
-  .ccat-chat-bubble table :where(thead, tfoot) {
-    @apply !ccat-text-base-100;
+  .chat-bubble table :where(thead, tfoot) {
+    @apply !text-base-100;
   }
-  .ccat-chat-bubble pre {
-    @apply !ccat-my-4 !ccat-whitespace-pre-wrap;
+  .chat-bubble pre {
+    @apply !my-4 !whitespace-pre-wrap;
   }
-  .ccat-chat-bubble ul {
-    @apply !ccat-list-disc !ccat-list-inside;
+  .chat-bubble ul {
+    @apply !list-disc !list-inside;
   }
-  .ccat-chat-bubble ol {
-    @apply !ccat-list-decimal !ccat-list-inside;
+  .chat-bubble ol {
+    @apply !list-decimal !list-inside;
   }
 }

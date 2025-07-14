@@ -1,9 +1,10 @@
 import { createContext } from "react";
-import { apiClient, tryRequest } from "@/config";
+import { tryRequest } from "@/config";
 import { MessagesContext } from "./messages";
 import { NotificationsContext } from "./notifications";
 import type { ContextProviderProps } from "@/types";
 import { createContextHook } from "@/hooks/createContextHook";
+import { CatClientContext } from "./apiClientProvider";
 
 interface MemoryContextType {
   wipeConversation: () => Promise<boolean>;
@@ -19,13 +20,15 @@ export const MemoryProvider = ({ children }: ContextProviderProps) => {
     NotificationsContext,
     "Notifications"
   );
+  const useApiClient = createContextHook(CatClientContext, "CatClient");
+  const { client: apiClient } = useApiClient();
 
   const { currentState: messagesState } = useMessages();
   const { sendNotificationFromJSON } = useNotifications();
 
   const wipeConversation = async () => {
     const result = await tryRequest(
-      apiClient.api?.memory.wipeConversationHistory(),
+      apiClient?.api?.memory.wipeConversationHistory(),
       "The current conversation was wiped",
       "Unable to wipe the in-memory current conversation"
     );

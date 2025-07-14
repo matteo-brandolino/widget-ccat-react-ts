@@ -1,8 +1,9 @@
 import { createContext, useState, ReactNode } from "react";
 import type { FileUploaderState } from "@stores/types";
-import { apiClient, tryRequest } from "@/config";
+import { tryRequest } from "@/config";
 import { createContextHook } from "@/hooks/createContextHook";
 import { NotificationsContext } from "./notifications";
+import { CatClientContext } from "./apiClientProvider";
 
 interface RabbitHoleContextType {
   currentState: FileUploaderState;
@@ -23,13 +24,14 @@ export const RabbitHoleProvider = ({ children }: { children: ReactNode }) => {
     NotificationsContext,
     "Notifications"
   );
-
+  const useApiClient = createContextHook(CatClientContext, "CatClient");
   const { sendNotificationFromJSON } = useNotifications();
+  const { client: apiClient } = useApiClient();
 
   const sendFile = (file: File) => {
     setCurrentState({ loading: true });
     tryRequest(
-      apiClient.api?.rabbitHole.uploadFile({ file }),
+      apiClient?.api?.rabbitHole.uploadFile({ file }),
       `File ${file.name} successfully sent down the rabbit hole!`,
       "Unable to send the file to the rabbit hole"
     ).then((res) => {
@@ -41,7 +43,7 @@ export const RabbitHoleProvider = ({ children }: { children: ReactNode }) => {
   const sendMemory = (file: File) => {
     setCurrentState({ loading: true });
     tryRequest(
-      apiClient.api?.rabbitHole.uploadMemory({ file }),
+      apiClient?.api?.rabbitHole.uploadMemory({ file }),
       "Memories file successfully sent down the rabbit hole!",
       "Unable to send the memories to the rabbit hole"
     ).then((res) => {
@@ -53,7 +55,7 @@ export const RabbitHoleProvider = ({ children }: { children: ReactNode }) => {
   const sendWebsite = (url: string) => {
     setCurrentState({ loading: true });
     tryRequest(
-      apiClient.api?.rabbitHole.uploadUrl({ url }),
+      apiClient?.api?.rabbitHole.uploadUrl({ url }),
       "Website successfully sent down the rabbit hole",
       "Unable to send the website to the rabbit hole"
     ).then((res) => {

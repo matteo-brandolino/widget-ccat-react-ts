@@ -20,7 +20,6 @@ export default {
   },
   plugins: [daisyui],
   darkMode: ["class", '[data-theme="dark"]'],
-  prefix: "ccat-",
   daisyui: {
     logs: false,
     themes: [

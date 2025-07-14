@@ -1,7 +1,7 @@
-import CatClient, { CatSettings } from "ccat-api";
-import { Feature, Features, updateClient } from "./config";
+import { CatSettings } from "ccat-api";
+import { Feature } from "./config";
 import { Message } from "./models/Message";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createContextHook } from "./hooks/createContextHook";
 import { MessagesContext } from "./stores/messages";
 import { RabbitHoleContext } from "./stores/rabbitHole";
@@ -23,9 +23,10 @@ import {
 import ModalBox from "./components/ModalBox";
 import NotificationStack from "./components/NotificationStack";
 import MessageBox from "./components/MessageBox";
+import { CatClientContext } from "./stores/apiClientProvider";
 import "./main.css";
 
-interface WidgetSettings {
+export interface WidgetSettings {
   settings: CatSettings & {
     dark?: boolean;
     why?: boolean;
@@ -40,26 +41,12 @@ interface WidgetSettings {
 }
 
 interface WidgetProps {
-  settings?: WidgetSettings["settings"];
-  onMessage?: (msg: Message) => void;
+  onMessage?: (msg: string) => void;
   onUpload?: (content: File | string) => void;
   onNotification?: (notification: Notification) => void;
 }
 
-const defaultSettings: WidgetSettings["settings"] = {
-  host: "localhost",
-  dark: false,
-  why: false,
-  user: "user",
-  thinking: "Cheshire Cat is thinking...",
-  placeholder: "Ask the Cheshire Cat...",
-  primary: "",
-  defaults: [],
-  features: Object.values(Features),
-};
-
 export const Widget = ({
-  settings = defaultSettings,
   onMessage,
   onUpload,
   onNotification,
@@ -84,10 +71,13 @@ export const Widget = ({
   const useMessages = createContextHook(MessagesContext, "Messages");
   const useRabbitHole = createContextHook(RabbitHoleContext, "RabbitHole");
   const useMemory = createContextHook(MemoryContext, "Memory");
+  const useApiClient = createContextHook(CatClientContext, "CatClient");
   const useNotifications = createContextHook(
     NotificationsContext,
     "NouseNotifications"
   );
+
+  const { settings } = useApiClient();
 
   const messagesStore = useMessages();
   const {
@@ -106,10 +96,6 @@ export const Widget = ({
 
   const { wipeConversation } = useMemory();
 
-  useEffect(() => {
-    updateClient(new CatClient(settings));
-  }, [settings]);
-
   const contentHandler = useCallback(
     (content: string | File[] | null) => {
       if (!content) return;
@@ -120,13 +106,17 @@ export const Widget = ({
           new URL(content);
           sendWebsite(content);
         } catch {
-          dispatchMessage(content, settings.user ?? "user", settings.callback);
+          dispatchMessage(
+            content,
+            settings?.user ?? "user",
+            settings?.callback
+          );
         }
       } else {
         content.forEach((f) => sendFile(f));
       }
     },
-    [sendWebsite, sendFile, dispatchMessage, settings.user, settings.callback]
+    [sendWebsite, sendFile, dispatchMessage, settings?.user, settings?.callback]
   );
 
   const handlePaste = (evt: React.ClipboardEvent<HTMLDivElement>) => {
@@ -175,12 +165,12 @@ export const Widget = ({
   }, [messagesState]);
 
   const hasMenu = useMemo(() => {
-    return (settings.features ?? []).filter((v) => v !== "record").length > 0;
-  }, [settings.features]);
+    return (settings?.features ?? []).filter((v) => v !== "record").length > 0;
+  }, [settings?.features]);
 
   const randomDefaultMessages = useMemo(() => {
-    return selectRandomDefaultMessages(settings.defaults);
-  }, [selectRandomDefaultMessages, settings.defaults]);
+    return selectRandomDefaultMessages(settings?.defaults);
+  }, [selectRandomDefaultMessages, settings?.defaults]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -207,9 +197,10 @@ export const Widget = ({
     (message: string) => {
       if (message === "") return;
       setUserMessage("");
-      dispatchMessage(message, settings.user ?? "user", settings.callback);
+      dispatchMessage(message, settings?.user ?? "user", settings?.callback);
+      onMessage?.(message);
     },
-    [dispatchMessage, settings.user, settings.callback]
+    [dispatchMessage, settings?.user, settings?.callback]
   );
 
   const preventSend = useCallback(
@@ -234,6 +225,7 @@ export const Widget = ({
       const file = e.target.files?.[0];
       if (file) {
         sendFile(file);
+        onUpload?.(file);
       }
     },
     [sendFile]
@@ -241,12 +233,12 @@ export const Widget = ({
 
   return (
     <div
-      data-theme={settings.dark ? "dark" : "light"}
+      data-theme={settings?.dark ? "dark" : "light"}
       style={{ height: "100%", width: "100%" }}
     >
       <div
-        data-theme={settings.dark ? "dark" : "light"}
-        className="ccat-relative ccat-flex ccat-h-full ccat-min-h-full ccat-w-full ccat-flex-col ccat-scroll-smooth ccat-transition-colors ccat-selection:bg-primary"
+        data-theme={settings?.dark ? "dark" : "light"}
+        className="relative flex h-full min-h-full w-full flex-col scroll-smooth transition-colors selection:bg-primary"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -254,37 +246,33 @@ export const Widget = ({
       >
         <NotificationStack />
 
-        <div className="ccat-relative ccat-flex ccat-h-full ccat-w-full ccat-flex-col ccat-justify-center ccat-gap-4 ccat-self-center ccat-text-sm">
+        <div className="relative flex h-full w-full flex-col justify-center gap-4 self-center text-sm">
           {isOverDropZone && (
-            <div className="ccat-flex ccat-h-full ccat-w-full ccat-grow ccat-flex-col ccat-items-center ccat-justify-center ccat-py-4 md:ccat-pb-0">
-              <div className="ccat-relative ccat-flex ccat-w-full ccat-grow ccat-items-center ccat-justify-center ccat-rounded-md ccat-border-2 ccat-border-dashed ccat-border-primary ccat-p-2 md:ccat-p-4">
-                <p className="ccat-text-lg md:ccat-text-xl">
-                  Drop{" "}
-                  <span className="ccat-font-medium ccat-text-primary">
-                    files
-                  </span>{" "}
+            <div className="flex h-full w-full grow flex-col items-center justify-center py-4 md:pb-0">
+              <div className="relative flex w-full grow items-center justify-center rounded-md border-2 border-dashed border-primary p-2 md:p-4">
+                <p className="text-lg md:text-xl">
+                  Drop <span className="font-medium text-primary">files</span>{" "}
                   to send to the Cheshire Cat, meow!
                 </p>
                 <button
-                  className="ccat-btn ccat-btn-circle ccat-btn-error ccat-btn-sm ccat-absolute ccat-right-2 ccat-top-2"
+                  className="btn btn-circle btn-error btn-sm absolute right-2 top-2"
                   onClick={() => setIsOverDropZone(false)}
                 >
-                  <XMarkIcon className="ccat-h-6 ccat-w-6" />
+                  <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
             </div>
           )}
-
           {!isOverDropZone && !messagesState.ready && (
-            <div className="ccat-flex ccat-grow ccat-items-center ccat-justify-center ccat-self-center">
+            <div className="flex grow items-center justify-center self-center">
               {messagesState.error ? (
-                <p className="ccat-w-fit ccat-rounded-md ccat-bg-error ccat-p-4 ccat-font-semibold ccat-text-base-100">
+                <p className="w-fit rounded-md bg-error p-4 font-semibold text-base-100">
                   {messagesState.error}
                 </p>
               ) : (
-                <p className="ccat-flex ccat-flex-col ccat-items-center ccat-justify-center ccat-gap-2">
-                  <span className="ccat-loading ccat-loading-spinner ccat-loading-lg ccat-text-primary" />
-                  <span className="ccat-text-lg ccat-font-medium ccat-text-neutral">
+                <p className="flex flex-col items-center justify-center gap-2">
+                  <span className="loading loading-spinner loading-lg text-primary" />
+                  <span className="text-lg font-medium text-neutral">
                     Getting ready...
                   </span>
                 </p>
@@ -295,26 +283,26 @@ export const Widget = ({
           {!isOverDropZone &&
             messagesState.ready &&
             messagesState.messages.length > 0 && (
-              <div className="ccat-flex ccat-grow ccat-flex-col ccat-overflow-y-auto">
+              <div className="flex grow flex-col overflow-y-auto">
                 {messagesState.messages.map((msg) => (
                   <MessageBox
                     key={msg.id}
                     sender={msg.sender}
                     text={msg.text}
-                    why={settings.why && msg.sender === "bot" ? msg.why : ""}
+                    why={settings?.why && msg.sender === "bot" ? msg.why : ""}
                   />
                 ))}
                 {messagesState.error && (
-                  <p className="ccat-w-fit ccat-rounded-md ccat-bg-error ccat-p-4 ccat-font-semibold ccat-text-base-100">
+                  <p className="w-fit rounded-md bg-error p-4 font-semibold text-base-100">
                     {messagesState.error}
                   </p>
                 )}
                 {!messagesState.error && messagesState.loading && (
-                  <div className="ccat-mb-2 ccat-ml-2 ccat-flex ccat-items-center ccat-gap-2">
-                    <span className="ccat-text-lg">😺</span>
-                    <p className="ccat-flex ccat-items-center ccat-gap-2">
-                      <span className="ccat-loading ccat-loading-dots ccat-loading-xs" />
-                      {settings.thinking}
+                  <div className="mb-2 ml-2 flex items-center gap-2">
+                    <span className="text-lg">😺</span>
+                    <p className="flex items-center gap-2">
+                      <span className="loading loading-dots loading-xs" />
+                      {settings?.thinking}
                     </p>
                   </div>
                 )}
@@ -324,11 +312,11 @@ export const Widget = ({
           {!isOverDropZone &&
             messagesState.ready &&
             messagesState.messages.length === 0 && (
-              <div className="ccat-flex ccat-grow ccat-cursor-pointer ccat-flex-col ccat-items-center ccat-justify-center ccat-gap-4 ccat-overflow-y-auto ccat-p-4">
+              <div className="flex grow cursor-pointer flex-col items-center justify-center gap-4 overflow-y-auto p-4">
                 {randomDefaultMessages.map((msg, index) => (
                   <div
                     key={index}
-                    className="ccat-btn ccat-btn-neutral ccat-font-medium ccat-normal-case ccat-text-base-100 ccat-shadow-lg"
+                    className="btn btn-neutral font-medium normal-case text-base-100 shadow-lg"
                     onClick={() => sendMessage(msg)}
                   >
                     {msg}
@@ -337,88 +325,88 @@ export const Widget = ({
               </div>
             )}
 
-          <div className="ccat-fixed ccat-bottom-0 ccat-left-0 ccat-flex ccat-w-full ccat-items-center ccat-justify-center">
-            <div className="ccat-flex ccat-w-full ccat-items-center ccat-gap-2 md:ccat-gap-4">
-              <div className="ccat-relative ccat-w-full">
+          <div className="fixed bottom-0 left-0 flex w-full items-center justify-center">
+            <div className="flex w-full items-center gap-2 md:gap-4">
+              <div className="relative w-full">
                 <textarea
                   value={userMessage}
                   onChange={(e) => setUserMessage(e.target.value)}
                   disabled={inputDisabled}
-                  className="ccat-textarea ccat-block ccat-max-h-20 ccat-w-full ccat-resize-none ccat-overflow-auto ccat-bg-base-200 !ccat-outline-offset-0"
-                  placeholder={settings.placeholder}
+                  className="textarea block max-h-20 w-full resize-none overflow-auto bg-base-200 !outline-offset-0"
+                  placeholder={settings?.placeholder}
                   onKeyDown={preventSend}
                   rows={1}
                 />
-                <div className="ccat-absolute ccat-right-2 ccat-top-1/2 ccat-flex -ccat-translate-y-1/2 ccat-gap-1">
+                <div className="absolute right-2 top-1/2 flex -translate-y-1/2 gap-1">
                   <button
                     disabled={inputDisabled || userMessage.length === 0}
-                    className="ccat-btn ccat-btn-circle ccat-btn-ghost ccat-btn-sm ccat-self-center"
+                    className="btn btn-circle btn-ghost btn-sm self-center"
                     onClick={() => sendMessage(userMessage)}
                   >
-                    <PaperAirplaneIcon className="ccat-h-6 ccat-w-6" />
+                    <PaperAirplaneIcon className="h-6 w-6" />
                   </button>
 
                   {hasMenu && (
-                    <div className="ccat-dropdown ccat-dropdown-end ccat-dropdown-top ccat-self-center">
+                    <div className="dropdown dropdown-end dropdown-top self-center">
                       <button
                         tabIndex={0}
                         disabled={inputDisabled}
-                        className="ccat-btn ccat-btn-circle ccat-btn-ghost ccat-btn-sm"
+                        className="btn btn-circle btn-ghost btn-sm"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       >
-                        <BoltIcon className="ccat-h-6 ccat-w-6" />
+                        <BoltIcon className="h-6 w-6" />
                       </button>
 
                       {isDropdownOpen && (
-                        <ul className="ccat-dropdown-content ccat-join ccat-join-vertical !-ccat-right-1/4 ccat-z-10 ccat-mb-5 ccat-p-0">
-                          {settings.features?.includes("memory") && (
+                        <ul className="dropdown-content join join-vertical !-right-1/4 z-10 mb-5 p-0">
+                          {settings?.features?.includes("memory") && (
                             <li>
                               <input
                                 type="file"
                                 disabled={rabbitHoleState.loading}
-                                className="ccat-btn ccat-join-item ccat-w-full ccat-flex-nowrap ccat-px-2"
+                                className="btn join-item w-full flex-nowrap px-2"
                                 onChange={handleMemoryUpload}
                               />
                             </li>
                           )}
-                          {settings.features?.includes("web") && (
+                          {settings?.features?.includes("web") && (
                             <li>
                               <button
                                 disabled={rabbitHoleState.loading}
-                                className="ccat-btn ccat-join-item ccat-w-full ccat-flex-nowrap ccat-px-2"
+                                className="btn join-item w-full flex-nowrap px-2"
                                 onClick={() => setIsModalOpen(true)}
                               >
-                                <span className="ccat-grow ccat-normal-case">
+                                <span className="grow normal-case">
                                   Upload url
                                 </span>
-                                <span className="ccat-rounded-lg ccat-bg-info ccat-p-1 ccat-text-base-100">
-                                  <GlobeAltIcon className="ccat-h-6 ccat-w-6" />
+                                <span className="rounded-lg bg-info p-1 text-base-100">
+                                  <GlobeAltIcon className="h-6 w-6" />
                                 </span>
                               </button>
                             </li>
                           )}
-                          {settings.features?.includes("file") && (
+                          {settings?.features?.includes("file") && (
                             <li>
                               <input
                                 type="file"
                                 disabled={rabbitHoleState.loading}
-                                className="ccat-btn ccat-join-item ccat-w-full ccat-flex-nowrap ccat-px-2"
+                                className="btn join-item w-full flex-nowrap px-2"
                                 onChange={handleFileUpload}
                               />
                             </li>
                           )}
-                          {settings.features?.includes("reset") && (
+                          {settings?.features?.includes("reset") && (
                             <li>
                               <button
                                 disabled={messagesState.messages.length === 0}
-                                className="ccat-btn ccat-join-item ccat-w-full ccat-flex-nowrap ccat-px-2"
+                                className="btn join-item w-full flex-nowrap px-2"
                                 onClick={wipeConversation}
                               >
-                                <span className="ccat-grow ccat-normal-case">
+                                <span className="grow normal-case">
                                   Clear conversation
                                 </span>
-                                <span className="ccat-rounded-lg ccat-bg-error ccat-p-1 ccat-text-base-100">
-                                  <TrashIcon className="ccat-h-6 ccat-w-6" />
+                                <span className="rounded-lg bg-error p-1 text-base-100">
+                                  <TrashIcon className="h-6 w-6" />
                                 </span>
                               </button>
                             </li>
@@ -430,42 +418,42 @@ export const Widget = ({
                 </div>
               </div>
 
-              {isSupported && settings.features?.includes("record") && (
+              {isSupported && settings?.features?.includes("record") && (
                 <button
-                  className={`ccat-btn ccat-btn-circle ccat-btn-primary ${
-                    isListening ? "ccat-glass ccat-btn-outline" : ""
+                  className={`btn btn-circle btn-primary ${
+                    isListening ? "glass btn-outline" : ""
                   }`}
                   disabled={inputDisabled}
                   onClick={() => SpeechRecognition.startListening}
                 >
-                  <MicrophoneIcon className="ccat-h-6 ccat-w-6" />
+                  <MicrophoneIcon className="h-6 w-6" />
                 </button>
               )}
             </div>
 
             {isScrollable && (
               <button
-                className="ccat-btn ccat-btn-circle ccat-btn-primary ccat-btn-outline ccat-btn-sm ccat-absolute ccat-bottom-28 ccat-right-4 ccat-bg-base-100"
+                className="btn btn-circle btn-primary btn-outline btn-sm absolute bottom-28 right-4 bg-base-100"
                 onClick={scrollToBottom}
               >
-                <ArrowDownIcon className="ccat-h-5 ccat-w-5" />
+                <ArrowDownIcon className="h-5 w-5" />
               </button>
             )}
           </div>
 
           <ModalBox isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-            <div className="ccat-flex ccat-flex-col ccat-items-center ccat-justify-center ccat-gap-4 ccat-text-neutral">
-              <h3 className="ccat-text-lg ccat-font-bold">Insert URL</h3>
+            <div className="flex flex-col items-center justify-center gap-4 text-neutral">
+              <h3 className="text-lg font-bold">Insert URL</h3>
               <p>Write down the URL you want the Cat to digest:</p>
               <input
                 value={insertedURL}
                 onChange={(e) => setInsertedURL(e.target.value)}
                 type="text"
                 placeholder="Enter url..."
-                className="ccat-input ccat-input-primary ccat-input-sm ccat-w-full !ccat-transition-all"
+                className="input input-primary input-sm w-full !transition-all"
               />
               <button
-                className="ccat-btn ccat-btn-primary ccat-btn-sm"
+                className="btn btn-primary btn-sm"
                 onClick={dispatchWebsite}
               >
                 Send
@@ -477,14 +465,14 @@ export const Widget = ({
         <input
           value={files}
           type="file"
-          className="ccat-hidden"
+          className="hidden"
           onChange={handleFileUpload}
         />
 
         <input
           value={memory}
           type="file"
-          className="ccat-hidden"
+          className="hidden"
           accept=".txt,.pdf,.doc,.docx"
           onChange={handleMemoryUpload}
         />

@@ -1,9 +1,32 @@
 import { RootProvider } from "./stores/root";
-import { Widget } from "./ChatWidget";
+import { Widget, WidgetSettings } from "./ChatWidget";
+import { Features } from "./config";
 
-export const CheshireCatWidget = () => {
+export const CheshireCatWidget = ({
+  host = "localhost",
+  dark = false,
+  why = false,
+  user = "user",
+  thinking = "Cheshire Cat is thinking...",
+  placeholder = "Ask the Cheshire Cat...",
+  primary = "",
+  defaults = [],
+  features = Object.values(Features),
+}: Partial<WidgetSettings["settings"]> = {}) => {
+  const settings = {
+    host,
+    dark,
+    why,
+    user,
+    thinking,
+    placeholder,
+    primary,
+    defaults,
+    features,
+  };
+
   return (
-    <RootProvider>
+    <RootProvider settings={settings}>
       <Widget />
     </RootProvider>
   );
