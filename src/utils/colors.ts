@@ -29,3 +29,16 @@ export const generateDarkenColorFrom = (input: string, percentage = 0.07) => {
   const str = colord(input).darken(percentage).toHslString();
   return turnColorValuesToString(str);
 };
+
+export function loadCss(href: string) {
+  const existingLink = document.querySelector(`link[href="${href}"]`);
+  if (existingLink) return;
+
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  link.type = "text/css";
+  link.onload = () => console.log(`${href} loaded`);
+  link.onerror = () => console.error(`Error loading CSS: ${href}`);
+  document.head.appendChild(link);
+}

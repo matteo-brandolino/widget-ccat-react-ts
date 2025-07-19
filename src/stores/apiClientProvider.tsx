@@ -1,10 +1,10 @@
 import { createContext, useEffect, useMemo, useState } from "react";
 import CatClient from "ccat-api";
-import { WidgetSettings } from "@/ChatWidget";
+import { WidgetSettings } from "@/types";
 
 interface CatClientContextValue {
   client: CatClient | null;
-  settings: WidgetSettings["settings"] | null;
+  settings: WidgetSettings | null;
 }
 
 export const CatClientContext = createContext<
@@ -12,7 +12,7 @@ export const CatClientContext = createContext<
 >(undefined);
 
 interface CatClientProviderProps {
-  settings: WidgetSettings["settings"];
+  settings: WidgetSettings;
   children: React.ReactNode;
 }
 
@@ -21,7 +21,7 @@ export const CatClientProvider = ({
   children,
 }: CatClientProviderProps) => {
   const [client, setClient] = useState<CatClient | null>(null);
-  const [, setCatSettings] = useState<WidgetSettings["settings"] | null>(null);
+  const [, setCatSettings] = useState<WidgetSettings | null>(null);
 
   useEffect(() => {
     const newClient = new CatClient(settings);

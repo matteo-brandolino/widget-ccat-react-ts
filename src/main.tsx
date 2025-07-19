@@ -1,23 +1,27 @@
 import { RootProvider } from "./stores/root";
-import { Widget, WidgetSettings } from "./ChatWidget";
+import { Widget } from "./ChatWidget";
 import { Features } from "./config";
+import { WidgetSettings } from "./types";
 
 export const CheshireCatWidget = ({
   host = "localhost",
   dark = false,
   why = false,
-  user = "user",
+  userId = "user",
   thinking = "Cheshire Cat is thinking...",
   placeholder = "Ask the Cheshire Cat...",
   primary = "",
   defaults = [],
   features = Object.values(Features),
-}: Partial<WidgetSettings["settings"]> = {}) => {
-  const settings = {
+  onMessage,
+  onUpload,
+  onNotification,
+}: WidgetSettings) => {
+  const settings: WidgetSettings = {
     host,
     dark,
     why,
-    user,
+    userId,
     thinking,
     placeholder,
     primary,
@@ -27,7 +31,11 @@ export const CheshireCatWidget = ({
 
   return (
     <RootProvider settings={settings}>
-      <Widget />
+      <Widget
+        onMessage={onMessage}
+        onUpload={onUpload}
+        onNotification={onNotification}
+      />
     </RootProvider>
   );
 };

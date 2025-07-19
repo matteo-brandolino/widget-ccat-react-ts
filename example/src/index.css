@@ -1,8 +1,24 @@
-html,
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body,
 #root {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
+  min-height: 100vh;
+}
+
+.chat-title {
+  font-size: 3rem;
+  text-align: center;
+  font-weight: 800;
+}
+
+html,
+body {
+  outline: 2px solid red;
+}
+#root {
+  outline: 2px solid blue;
 }
