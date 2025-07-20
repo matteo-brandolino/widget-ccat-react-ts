@@ -12,7 +12,6 @@ import {
   XMarkIcon,
   BoltIcon,
   MicrophoneIcon,
-  ArrowDownIcon,
   GlobeAltIcon,
   TrashIcon,
   DocumentTextIcon,
@@ -29,17 +28,14 @@ import FileInputWithIcon from "./components/FileInputWithIcon";
 export const Widget = ({
   onMessage,
   onUpload,
+  onMemory,
   onNotification,
 }: WidgetEvents) => {
   const [userMessage, setUserMessage] = useState("");
   const [insertedURL, setInsertedURL] = useState("");
-  const [isScrollable, setIsScrollable] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [textArea, setTextArea] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isOverDropZone, setIsOverDropZone] = useState(false);
-  const [files, setFiles] = useState([]);
-  const [memory, setMemory] = useState([]);
   const [theme, setTheme] = useState<"dark" | "light">("light");
 
   const {
@@ -74,7 +70,7 @@ export const Widget = ({
 
   const useNotifications = createContextHook(
     NotificationsContext,
-    "NouseNotifications"
+    "Notifications"
   );
   const { currentState: notificationsState } = useNotifications();
   useEffect(() => {
@@ -151,6 +147,7 @@ export const Widget = ({
       const file = e.target.files?.[0];
       if (file) {
         sendMemory(file);
+        onMemory?.(file);
       }
     },
     [sendMemory]
@@ -229,6 +226,18 @@ export const Widget = ({
     },
     [sendFile]
   );
+
+  const handleListening = () => {
+    SpeechRecognition.startListening();
+  };
+
+  useEffect(() => {
+    console.log(transcript);
+    if (transcript) {
+      setUserMessage(transcript);
+      resetTranscript();
+    }
+  }, [transcript, resetTranscript]);
 
   return (
     <div
@@ -414,28 +423,18 @@ export const Widget = ({
                 )}
               </div>
             </div>
-
             {isSupported && settings?.features?.includes("record") && (
               <button
                 className={`btn btn-circle btn-primary ${
                   isListening ? "glass btn-outline" : ""
                 }`}
                 disabled={inputDisabled}
-                onClick={() => SpeechRecognition.startListening}
+                onClick={handleListening}
               >
                 <MicrophoneIcon className="h-6 w-6" />
               </button>
             )}
           </div>
-
-          {isScrollable && (
-            <button
-              className="btn btn-circle btn-primary btn-outline btn-sm absolute bottom-28 right-4 bg-base-100"
-              onClick={scrollToBottom}
-            >
-              <ArrowDownIcon className="h-5 w-5" />
-            </button>
-          )}
         </div>
 
         <ModalBox isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>

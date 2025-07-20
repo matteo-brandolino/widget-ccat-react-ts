@@ -16,6 +16,7 @@ export const CheshireCatWidget = ({
   onMessage,
   onUpload,
   onNotification,
+  onMemory,
 }: WidgetSettings) => {
   const settings: WidgetSettings = {
     host,
@@ -35,6 +36,7 @@ export const CheshireCatWidget = ({
         onMessage={onMessage}
         onUpload={onUpload}
         onNotification={onNotification}
+        onMemory={onMemory}
       />
     </RootProvider>
   );

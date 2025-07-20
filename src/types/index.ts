@@ -11,6 +11,7 @@ export interface WidgetEvents {
   onMessage?: (msg: string) => void;
   onUpload?: (content: File | string) => void;
   onNotification?: (notification: Notification) => void;
+  onMemory?: (file: File) => void;
 }
 
 export interface WidgetSettings extends CatSettings, WidgetEvents {
