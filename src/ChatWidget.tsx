@@ -232,7 +232,6 @@ export const Widget = ({
   };
 
   useEffect(() => {
-    console.log(transcript);
     if (transcript) {
       setUserMessage(transcript);
       resetTranscript();
