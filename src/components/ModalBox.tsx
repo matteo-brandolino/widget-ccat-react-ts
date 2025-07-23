@@ -1,6 +1,6 @@
 import { useState, ReactNode } from "react";
 import { Dialog, DialogPanel, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 
 type ModalBoxProps = {
   isOpen?: boolean;
@@ -17,6 +17,10 @@ export default function ModalBox({
 }: ModalBoxProps) {
   const [isModalOpen, setIsModalOpen] = useState(isOpen);
 
+  useEffect(() => {
+    setIsModalOpen(isOpen);
+  }, [isOpen]);
+
   const closeModal = () => {
     if (closable) {
       setIsModalOpen(false);
@@ -28,6 +32,7 @@ export default function ModalBox({
     <Transition show={isModalOpen} as={Fragment} appear>
       <Dialog as="div" className="relative z-10" onClose={closeModal}>
         <Transition
+          show={isModalOpen}
           as={Fragment}
           enter="duration-300 ease-out"
           enterFrom="opacity-0"
@@ -42,6 +47,7 @@ export default function ModalBox({
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <Transition
+              show={isModalOpen}
               as={Fragment}
               enter="duration-300 ease-out"
               enterFrom="opacity-0 scale-95"

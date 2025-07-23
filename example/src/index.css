@@ -22,3 +22,8 @@ body {
 #root {
   outline: 2px solid blue;
 }
+
+#root {
+  display: flex;
+  flex-direction: column;
+}

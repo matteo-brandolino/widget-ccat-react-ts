@@ -240,7 +240,7 @@ export const Widget = ({
 
   return (
     <div
-      className="relative flex h-full min-h-full w-full flex-col scroll-smooth transition-colors selection:bg-primary"
+      className="relative grow flex h-full min-h-full w-full flex-col scroll-smooth transition-colors selection:bg-primary"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -249,7 +249,7 @@ export const Widget = ({
     >
       <NotificationStack />
 
-      <div className="relative flex h-full w-full flex-col justify-center gap-4 self-center text-sm">
+      <div className="relative grow flex h-full w-full flex-col justify-center gap-4 self-center text-sm">
         {isOverDropZone && (
           <div className="flex h-full w-full grow flex-col items-center justify-center py-4 md:pb-0">
             <div className="relative flex w-full grow items-center justify-center rounded-md border-2 border-dashed border-primary p-2 md:p-4">
@@ -435,7 +435,6 @@ export const Widget = ({
             )}
           </div>
         </div>
-
         <ModalBox isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <div className="flex flex-col items-center justify-center gap-4 text-neutral">
             <h3 className="text-lg font-bold">Insert URL</h3>
