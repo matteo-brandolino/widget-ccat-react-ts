@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createContextHook } from "./hooks/createContextHook";
 import { MessagesContext } from "./stores/messages";
 import { RabbitHoleContext } from "./stores/rabbitHole";
@@ -15,6 +15,7 @@ import {
   GlobeAltIcon,
   TrashIcon,
   DocumentTextIcon,
+  ArrowDownIcon,
 } from "@heroicons/react/24/solid";
 import { Brain } from "lucide-react";
 import ModalBox from "./components/ModalBox";
@@ -36,6 +37,8 @@ export const Widget = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isOverDropZone, setIsOverDropZone] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [isTwoLines, setIsTwoLines] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("light");
 
   const {
@@ -44,6 +47,11 @@ export const Widget = ({
     resetTranscript,
     browserSupportsSpeechRecognition: isSupported,
   } = useSpeechRecognition();
+
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const chatRootRef = useRef<HTMLDivElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const dragCounterRef = useRef(0);
 
   const useApiClient = createContextHook(CatClientContext, "CatClient");
   const { settings } = useApiClient();
@@ -73,17 +81,49 @@ export const Widget = ({
     "Notifications"
   );
   const { currentState: notificationsState } = useNotifications();
+
   useEffect(() => {
     const lastNotification = notificationsState.history.slice(-1)[0];
     if (lastNotification && !lastNotification.hidden) {
       onNotification?.(lastNotification);
     }
-  }, [notificationsState]);
+  }, [notificationsState, onNotification]);
 
   useEffect(() => {
     const theme = settings?.dark ? "dark" : "light";
     setTheme(theme);
   }, [settings]);
+
+  useEffect(() => {
+    if (transcript) {
+      setUserMessage(transcript);
+      resetTranscript();
+    }
+  }, [transcript, resetTranscript]);
+
+  useEffect(() => {
+    if (textAreaRef.current) {
+      const textarea = textAreaRef.current;
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+      setIsTwoLines(textarea.scrollHeight >= 72);
+    }
+  }, [userMessage]);
+
+  useEffect(() => {
+    if (messagesState.messages.length > 0) {
+      onMessage?.(messagesState.messages.slice(-1)[0]);
+    }
+
+    if (chatRootRef.current) {
+      setIsScrollable(
+        chatRootRef.current.scrollHeight > chatRootRef.current.clientHeight
+      );
+    }
+
+    scrollToBottom();
+    textAreaRef.current?.focus();
+  }, [messagesState.messages, onMessage]);
 
   const contentHandler = useCallback(
     (content: string | File[] | null) => {
@@ -94,6 +134,7 @@ export const Widget = ({
         try {
           new URL(content);
           sendWebsite(content);
+          onUpload?.(content);
         } catch {
           dispatchMessage(
             content,
@@ -111,36 +152,90 @@ export const Widget = ({
       dispatchMessage,
       settings?.userId,
       settings?.callback,
+      onUpload,
     ]
   );
 
-  const handlePaste = (evt: React.ClipboardEvent<HTMLDivElement>) => {
-    const target = evt.target as HTMLElement;
-    if (
-      target.tagName === "TEXTAREA" &&
-      (target as HTMLTextAreaElement).dataset.skipPaste !== undefined
-    ) {
-      return;
-    }
+  const handlePaste = useCallback(
+    (evt: React.ClipboardEvent<HTMLDivElement>) => {
+      const target = evt.target as HTMLElement;
 
-    const clipboardData = evt.clipboardData;
-    const text = clipboardData?.getData("text");
-    const files = clipboardData?.files ? Array.from(clipboardData.files) : [];
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
 
-    contentHandler(text || files);
-  };
+      const text = evt.clipboardData?.getData("text");
+      const files = Array.from(evt.clipboardData?.files ?? []);
+
+      contentHandler(text || files);
+    },
+    [contentHandler]
+  );
+
+  const handleDragEnter = useCallback(
+    (evt: React.DragEvent<HTMLDivElement>) => {
+      evt.preventDefault();
+      dragCounterRef.current++;
+
+      if (dragCounterRef.current === 1) {
+        setIsOverDropZone(true);
+      }
+    },
+    []
+  );
+
+  const handleDragLeave = useCallback(
+    (evt: React.DragEvent<HTMLDivElement>) => {
+      evt.preventDefault();
+      dragCounterRef.current--;
+
+      if (dragCounterRef.current === 0) {
+        setIsOverDropZone(false);
+      }
+    },
+    []
+  );
+
+  const handleDragOver = useCallback((evt: React.DragEvent<HTMLDivElement>) => {
+    evt.preventDefault();
+  }, []);
+
+  const handleDrop = useCallback(
+    (evt: React.DragEvent<HTMLDivElement>) => {
+      evt.preventDefault();
+
+      dragCounterRef.current = 0;
+      setIsOverDropZone(false);
+
+      const text = evt.dataTransfer?.getData("text");
+      const files = Array.from(evt.dataTransfer?.files ?? []);
+
+      contentHandler(text || files);
+    },
+    [contentHandler]
+  );
+
+  const closeDragOverlay = useCallback(() => {
+    dragCounterRef.current = 0;
+    setIsOverDropZone(false);
+  }, []);
 
   const dispatchWebsite = useCallback(() => {
     if (!insertedURL) return;
     try {
       new URL(insertedURL);
       sendWebsite(insertedURL);
+      onUpload?.(insertedURL);
       setIsModalOpen(false);
       setInsertedURL("");
     } catch {
       setInsertedURL("");
     }
-  }, [insertedURL, sendWebsite]);
+  }, [insertedURL, sendWebsite, onUpload]);
 
   const handleMemoryUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,8 +245,44 @@ export const Widget = ({
         onMemory?.(file);
       }
     },
-    [sendMemory]
+    [sendMemory, onMemory]
   );
+
+  const sendMessage = useCallback(
+    (message: string) => {
+      if (message === "") return;
+      setUserMessage("");
+      dispatchMessage(message, settings?.userId ?? "user", settings?.callback);
+    },
+    [dispatchMessage, settings?.userId, settings?.callback]
+  );
+
+  const preventSend = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(userMessage);
+    }
+  };
+
+  const scrollToBottom = useCallback(() => {
+    chatRootRef.current?.scrollTo({
+      behavior: "smooth",
+      left: 0,
+      top: chatRootRef.current?.scrollHeight,
+    });
+  }, []);
+
+  const handleFileUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        sendFile(file);
+        onUpload?.(file);
+      }
+    },
+    [sendFile, onUpload]
+  );
+
   const inputDisabled = useMemo(() => {
     return (
       messagesState.loading ||
@@ -168,88 +299,24 @@ export const Widget = ({
     return selectRandomDefaultMessages(settings?.defaults);
   }, [selectRandomDefaultMessages, settings?.defaults]);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsOverDropZone(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsOverDropZone(false);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsOverDropZone(false);
-      const text = e.dataTransfer.getData("text");
-      const files = Array.from(e.dataTransfer.files);
-      contentHandler(text || files);
-    },
-    [contentHandler]
-  );
-
-  const sendMessage = useCallback(
-    (message: string) => {
-      if (message === "") return;
-      setUserMessage("");
-      dispatchMessage(message, settings?.userId ?? "user", settings?.callback);
-      onMessage?.(message);
-    },
-    [dispatchMessage, settings?.userId, settings?.callback]
-  );
-
-  const preventSend = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage(userMessage);
-      }
-    },
-    [sendMessage, userMessage]
-  );
-
-  const scrollToBottom = () => {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "smooth",
-    });
-  };
-
-  const handleFileUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        sendFile(file);
-        onUpload?.(file);
-      }
-    },
-    [sendFile]
-  );
-
-  const handleListening = () => {
-    SpeechRecognition.startListening();
-  };
-
-  useEffect(() => {
-    if (transcript) {
-      setUserMessage(transcript);
-      resetTranscript();
-    }
-  }, [transcript, resetTranscript]);
-
   return (
     <div
+      ref={dropZoneRef}
       className="relative grow flex h-full min-h-full w-full flex-col scroll-smooth transition-colors selection:bg-primary"
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
       onPaste={handlePaste}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
       data-theme={theme}
     >
       <NotificationStack />
 
-      <div className="relative grow flex h-full w-full flex-col justify-center gap-4 self-center text-sm">
+      <div
+        className={`relative flex h-full w-full flex-col justify-center gap-4 self-center text-sm ${
+          !isTwoLines ? "pb-16 md:pb-20" : "pb-20 md:pb-24"
+        }`}
+      >
         {isOverDropZone && (
           <div className="flex h-full w-full grow flex-col items-center justify-center py-4 md:pb-0">
             <div className="relative flex w-full grow items-center justify-center rounded-md border-2 border-dashed border-primary p-2 md:p-4">
@@ -259,7 +326,7 @@ export const Widget = ({
               </p>
               <button
                 className="btn btn-circle btn-error btn-sm absolute right-2 top-2"
-                onClick={() => setIsOverDropZone(false)}
+                onClick={closeDragOverlay}
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
@@ -286,7 +353,10 @@ export const Widget = ({
         {!isOverDropZone &&
           messagesState.ready &&
           messagesState.messages.length > 0 && (
-            <div className="flex grow flex-col overflow-y-auto">
+            <div
+              ref={chatRootRef}
+              className="flex grow flex-col overflow-y-auto"
+            >
               {messagesState.messages.map((msg) => (
                 <MessageBox
                   key={msg.id}
@@ -332,15 +402,27 @@ export const Widget = ({
           <div className="flex w-full items-center gap-2 md:gap-4">
             <div className="relative w-full">
               <textarea
+                ref={textAreaRef}
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 disabled={inputDisabled}
                 className="textarea block max-h-20 w-full resize-none overflow-auto bg-base-200 !outline-offset-0"
+                style={{
+                  paddingRight: hasMenu
+                    ? isTwoLines
+                      ? "2.5rem"
+                      : "5rem"
+                    : "2.5rem",
+                }}
                 placeholder={settings?.placeholder}
                 onKeyDown={preventSend}
                 rows={1}
               />
-              <div className="absolute right-2 top-1/2 flex -translate-y-1/2 gap-1">
+              <div
+                className={`absolute right-2 top-1/2 flex -translate-y-1/2 gap-1 ${
+                  isTwoLines ? "flex-col-reverse" : ""
+                }`}
+              >
                 <button
                   disabled={inputDisabled || userMessage.length === 0}
                   className="btn btn-circle btn-ghost btn-sm self-center"
@@ -428,13 +510,23 @@ export const Widget = ({
                   isListening ? "glass btn-outline" : ""
                 }`}
                 disabled={inputDisabled}
-                onClick={handleListening}
+                onClick={() => SpeechRecognition.startListening()}
               >
                 <MicrophoneIcon className="h-6 w-6" />
               </button>
             )}
           </div>
+
+          {isScrollable && (
+            <button
+              className="btn btn-circle btn-primary btn-outline btn-sm absolute bottom-28 right-4 bg-base-100"
+              onClick={scrollToBottom}
+            >
+              <ArrowDownIcon className="h-5 w-5" />
+            </button>
+          )}
         </div>
+
         <ModalBox isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <div className="flex flex-col items-center justify-center gap-4 text-neutral">
             <h3 className="text-lg font-bold">Insert URL</h3>

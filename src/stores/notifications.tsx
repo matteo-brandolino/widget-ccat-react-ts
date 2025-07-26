@@ -58,7 +58,6 @@ export const NotificationsProvider = ({ children }: ContextProviderProps) => {
         id: uniqueId("n_"),
         ...notification,
       };
-
       setCurrentState((prevState) => ({
         ...prevState,
         history: [...prevState.history, newNotification],

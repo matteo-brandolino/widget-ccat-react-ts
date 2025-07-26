@@ -1,4 +1,5 @@
 import { Feature } from "@/config";
+import { Message } from "@/models/Message";
 import { Notification } from "@/models/Notification";
 import { CatSettings } from "ccat-api";
 import { ReactNode } from "react";
@@ -8,7 +9,7 @@ export interface ContextProviderProps {
 }
 
 export interface WidgetEvents {
-  onMessage?: (msg: string) => void;
+  onMessage?: (msg: Message) => void;
   onUpload?: (content: File | string) => void;
   onNotification?: (notification: Notification) => void;
   onMemory?: (file: File) => void;

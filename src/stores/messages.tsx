@@ -90,9 +90,6 @@ export const MessagesProvider = ({ children }: ContextProviderProps) => {
           ready: false,
           error: error.description,
         }));
-      })
-      .onDisconnected(() => {
-        setCurrentState((state) => ({ ...state, ready: false }));
       });
 
     return () => {
