@@ -1,5 +1,5 @@
 {
-  "name": "widget-ccat-react-ts",
+  "name": "ccat-react-ts",
   "version": "1.0.0",
   "description": "CheshireCat React Widget",
   "type": "module",
@@ -22,7 +22,8 @@
     "dev": "tsup --watch & (cd example && npm run dev)",
     "build": "tsup",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run build:css"
+    "prepublishOnly": "npm run build && npm run build:css",
+    "build:css": "tailwindcss -i src/main.css -o dist/index.css --minify"
   },
   "keywords": [
     "react",
@@ -30,7 +31,7 @@
     "cheshire-cat",
     "typescript"
   ],
-  "author": "",
+  "author": "Matteo Brandolino",
   "license": "ISC",
   "dependencies": {
     "@headlessui/react": "^2.2.4",

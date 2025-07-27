@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "widget-ccat-react-ts": path.resolve(__dirname, "../src"),
+      "ccat-react-ts": path.resolve(__dirname, "../src"),
       "@": path.resolve(__dirname, "../src"),
       "@components": path.resolve(__dirname, "../src/components"),
       "@stores": path.resolve(__dirname, "../src/stores"),
@@ -17,6 +17,6 @@ export default defineConfig({
   },
   publicDir: path.resolve(__dirname, "../dist"),
   optimizeDeps: {
-    exclude: ["widget-ccat-react-ts"],
+    exclude: ["ccat-react-ts"],
   },
 });
