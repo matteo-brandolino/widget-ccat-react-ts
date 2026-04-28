@@ -7,13 +7,13 @@ React chat widget for the Cheshire Cat, ready to be used on any website.
 You can install the widget via npm:
 
 ```bash
-npm install @cheshire-cat-ai/widget-react
+npm install ccat-react-ts
 ```
 
 Or using yarn:
 
 ```bash
-yarn add @cheshire-cat-ai/widget-react
+yarn add ccat-react-ts
 ```
 
 ## How to import
@@ -21,8 +21,8 @@ yarn add @cheshire-cat-ai/widget-react
 Import the component and styles in your React application:
 
 ```jsx
-import { CheshireCatChat } from "@cheshire-cat-ai/widget-react";
-import "@cheshire-cat-ai/widget-react/dist/style.css";
+import { CheshireCatChat } from "ccat-react-ts";
+import "ccat-react-ts/styles.css";
 
 function App() {
   return (
@@ -61,8 +61,8 @@ The available widget props are:
 
 ```jsx
 import React from "react";
-import { CheshireCatChat } from "@cheshire-cat-ai/widget-react";
-import "@cheshire-cat-ai/widget-react/dist/style.css";
+import { CheshireCatChat } from "ccat-react-ts";
+import "ccat-react-ts/styles.css";
 
 function App() {
   const handleMessage = (message) => {
@@ -111,7 +111,7 @@ You can handle various events by passing callback props:
 
 ```jsx
 import React from "react";
-import { CheshireCatChat } from "@cheshire-cat-ai/widget-react";
+import { CheshireCatChat } from "ccat-react-ts";
 
 function App() {
   const handleMessage = (message) => {
@@ -160,5 +160,5 @@ import {
   Notification,
   PromptSettings,
   Feature,
-} from "@cheshire-cat-ai/widget-react";
+} from "ccat-react-ts";
 ```
